@@ -2,21 +2,9 @@ import { genAI } from '../config/gemini';
 
 export const aiService = {
   async analyzeEmergency(text: string) {
-    if (!genAI || process.env.GEMINI_API_KEY?.startsWith('AQ.Ab8') || process.env.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
-      const isFire = text.toLowerCase().includes('fire');
-      const isAccident = text.toLowerCase().includes('accident');
-      return {
-        incident_type: isFire ? 'Fire' : isAccident ? 'Road Accident' : 'Personal Safety',
-        severity: isFire ? 'Critical' : isAccident ? 'High' : 'Medium',
-        people_involved: isAccident ? 2 : 1,
-        injury_reported: isAccident,
-        hazard_reported: isFire,
-        summary: `Mock Analysis: ${text}`,
-        recommended_action: 'This is a mock recommendation. Please set a valid GEMINI_API_KEY that has models enabled.'
-      };
-    }
-
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    if (!genAI) throw new Error('Gemini API not configured');
+    
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash' });
 
     const prompt = `
 You are an AI assistant helping to categorize emergencies.
@@ -55,16 +43,9 @@ Rule: Do not invent details not present in the description. If injuries are not 
   },
 
   async analyzeImage(mimeType: string, base64Data: string) {
-    if (!genAI || process.env.GEMINI_API_KEY?.startsWith('AQ.Ab8') || process.env.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
-      return {
-        visible_objects: ["person", "mock background"],
-        text_detected: "None",
-        possible_hazards: ["Unknown hazard (mock)"],
-        description: "This is a mock image analysis because a valid GEMINI_API_KEY is not set."
-      };
-    }
-
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro-vision' });
+    if (!genAI) throw new Error('Gemini API not configured');
+    
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash' });
 
     const prompt = `
 Analyze this image from a potential emergency situation.
