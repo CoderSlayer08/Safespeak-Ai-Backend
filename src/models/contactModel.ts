@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase';
+import { createUserScopedClient } from '../config/supabase';
 
 export interface Contact {
   id?: string;
@@ -9,8 +9,8 @@ export interface Contact {
 }
 
 export const contactModel = {
-  async getByUser(user_id: string): Promise<Contact[]> {
-    const { data, error } = await supabase
+  async getByUser(accessToken: string, user_id: string): Promise<Contact[]> {
+    const { data, error } = await createUserScopedClient(accessToken)
       .from('emergency_contacts')
       .select('*')
       .eq('user_id', user_id);
@@ -18,8 +18,8 @@ export const contactModel = {
     return data || [];
   },
   
-  async create(contact: Contact): Promise<Contact> {
-    const { data, error } = await supabase
+  async create(accessToken: string, contact: Contact): Promise<Contact> {
+    const { data, error } = await createUserScopedClient(accessToken)
       .from('emergency_contacts')
       .insert([contact])
       .select()
@@ -28,11 +28,14 @@ export const contactModel = {
     return data;
   },
 
-  async delete(id: string): Promise<void> {
-    const { error } = await supabase
+  async delete(accessToken: string, id: string, user_id: string): Promise<boolean> {
+    const { data, error } = await createUserScopedClient(accessToken)
       .from('emergency_contacts')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user_id)
+      .select('id');
     if (error) throw new Error(error.message);
+    return (data?.length || 0) > 0;
   }
 };

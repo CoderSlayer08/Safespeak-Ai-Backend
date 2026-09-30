@@ -19,8 +19,8 @@ export const authService = {
     });
 
     const token = jwt.sign(
-      { userId: newUser.id, email: newUser.email },
-      process.env.JWT_SECRET as string,
+      { sub: newUser.id, userId: newUser.id, email: newUser.email, role: 'authenticated' },
+      getSigningSecret(),
       { expiresIn: '30d' }
     );
 
@@ -42,8 +42,8 @@ export const authService = {
     }
 
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.JWT_SECRET as string,
+      { sub: user.id, userId: user.id, email: user.email, role: 'authenticated' },
+      getSigningSecret(),
       { expiresIn: '30d' }
     );
 
@@ -53,3 +53,9 @@ export const authService = {
     };
   }
 };
+
+function getSigningSecret(): string {
+  const secret = process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT secret is not configured');
+  return secret;
+}

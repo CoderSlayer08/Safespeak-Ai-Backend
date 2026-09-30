@@ -5,11 +5,11 @@ export const aiController = {
   async analyzeText(req: Request, res: Response, next: NextFunction) {
     try {
       const { text } = req.body;
-      if (!text) {
-        return res.status(400).json({ success: false, message: 'Text is required' });
+      if (typeof text !== 'string' || !text.trim() || text.length > 5000) {
+        return res.status(400).json({ success: false, message: 'Text must be between 1 and 5000 characters' });
       }
 
-      const data = await aiService.analyzeEmergency(text);
+      const data = await aiService.analyzeEmergency(text.trim());
       res.status(200).json({ success: true, data });
     } catch (error) {
       next(error);

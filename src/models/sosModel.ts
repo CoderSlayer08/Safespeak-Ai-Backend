@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase';
+import { createUserScopedClient } from '../config/supabase';
 
 export interface SOSEvent {
   id?: string;
@@ -18,8 +18,8 @@ export interface SOSEvent {
 }
 
 export const sosModel = {
-  async create(sosData: SOSEvent): Promise<SOSEvent> {
-    const { data, error } = await supabase
+  async create(accessToken: string, sosData: SOSEvent): Promise<SOSEvent> {
+    const { data, error } = await createUserScopedClient(accessToken)
       .from('sos_events')
       .insert([sosData])
       .select()
@@ -31,8 +31,8 @@ export const sosModel = {
     return data;
   },
 
-  async getByUser(user_id: string): Promise<SOSEvent[]> {
-    const { data, error } = await supabase
+  async getByUser(accessToken: string, user_id: string): Promise<SOSEvent[]> {
+    const { data, error } = await createUserScopedClient(accessToken)
       .from('sos_events')
       .select('*')
       .eq('user_id', user_id)
@@ -44,12 +44,13 @@ export const sosModel = {
     return data || [];
   },
   
-  async getById(id: string): Promise<SOSEvent> {
-    const { data, error } = await supabase
+  async getById(accessToken: string, id: string, user_id: string): Promise<SOSEvent | null> {
+    const { data, error } = await createUserScopedClient(accessToken)
       .from('sos_events')
       .select('*')
       .eq('id', id)
-      .single();
+      .eq('user_id', user_id)
+      .maybeSingle();
 
     if (error) {
       throw new Error(error.message);
@@ -57,18 +58,19 @@ export const sosModel = {
     return data;
   },
 
-  async updateStatus(id: string, status: string): Promise<SOSEvent> {
+  async updateStatus(accessToken: string, id: string, user_id: string, status: string): Promise<SOSEvent | null> {
     const updateData: any = { status };
     if (status === 'RESOLVED') {
       updateData.resolved_at = new Date().toISOString();
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await createUserScopedClient(accessToken)
       .from('sos_events')
       .update(updateData)
       .eq('id', id)
+      .eq('user_id', user_id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       throw new Error(error.message);

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { aiController } from '../controllers/aiController';
 import { authMiddleware } from '../middleware/authMiddleware';
+import { aiRateLimit } from '../middleware/aiRateLimit';
 
 const router = Router();
 const upload = multer({
@@ -18,7 +19,7 @@ const upload = multer({
   }
 });
 
-router.post('/analyze', aiController.analyzeText);
-router.post('/analyze-image', upload.single('image'), aiController.analyzeImage);
+router.post('/analyze', authMiddleware, aiRateLimit, aiController.analyzeText);
+router.post('/analyze-image', authMiddleware, aiRateLimit, upload.single('image'), aiController.analyzeImage);
 
 export default router;

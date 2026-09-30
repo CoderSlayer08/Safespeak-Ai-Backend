@@ -6,6 +6,7 @@ export interface AuthRequest extends Request {
     userId: string;
     email: string;
   };
+  accessToken?: string;
 }
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -18,12 +19,13 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string; email: string };
-    req.user = decoded;
-    
-    // Optional: Attach JWT to supabase instance for RLS in this request scope
-    // This is complex in a standard express app without a request-scoped supabase client.
-    // We will pass the token to supabase in the services instead.
+    const signingSecret = process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET;
+    if (!signingSecret) throw new Error('JWT secret is not configured');
+    const decoded = jwt.verify(token, signingSecret) as { userId?: string; sub?: string; email: string };
+    const userId = decoded.userId || decoded.sub;
+    if (!userId) throw new Error('JWT subject is missing');
+    req.user = { userId, email: decoded.email };
+    req.accessToken = token;
     
     next();
   } catch (error) {

@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase';
+import { supabaseAdmin } from '../config/supabase';
 
 export interface User {
   id?: string;
@@ -11,7 +11,7 @@ export interface User {
 
 export const userModel = {
   async findByEmail(email: string): Promise<User | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .select('*')
       .eq('email', email)
@@ -24,7 +24,7 @@ export const userModel = {
   },
 
   async findById(id: string): Promise<User | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .select('*')
       .eq('id', id)
@@ -37,7 +37,7 @@ export const userModel = {
   },
 
   async create(user: User): Promise<User> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .insert([user])
       .select()
