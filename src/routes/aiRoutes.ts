@@ -18,7 +18,7 @@ const upload = multer({
   }
 });
 
-router.post('/analyze', authMiddleware, aiController.analyzeText);
-router.post('/analyze-image', authMiddleware, upload.single('image'), aiController.analyzeImage);
+router.post('/analyze', aiController.analyzeText);
+router.post('/analyze-image', upload.single('image'), aiController.analyzeImage);
 
 export default router;
